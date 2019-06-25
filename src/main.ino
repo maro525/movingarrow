@@ -9,6 +9,7 @@
 #define P6 8
 #define P7 9
 #define INTERVAL 100
+#define TEXT "ALPHA"
 
 void write_array(bool data[])
 {
@@ -52,11 +53,8 @@ void setup() {
     pinMode(P5, OUTPUT);
     pinMode(P6, OUTPUT);
     pinMode(P7, OUTPUT);
-
-    String text = "alpha";
-    write_sentence(text);
 }
 
 void loop() {
-
+    write_sentence(text);
 }
