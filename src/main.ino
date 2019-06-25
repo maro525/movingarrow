@@ -8,6 +8,7 @@
 #define P5 7
 #define P6 8
 #define P7 9
+#define INTERVAL 100
 
 void write_array(bool data[])
 {
@@ -27,6 +28,7 @@ void write_char(char c)
     for(int i = 0; i < 8; i++)
     {
         write_array(a[i]);
+        delay(INTERVAL)
     }
 }
 
