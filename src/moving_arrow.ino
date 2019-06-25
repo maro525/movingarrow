@@ -1,6 +1,6 @@
 bool a[8][8];
-int count = 0;
-int char_count=0;
+// int count = 0;
+// int char_count=0;
 
 // void setup() {
 //   Serial.begin(38400);
@@ -26,7 +26,7 @@ int char_count=0;
 
 void updateArray(int n) {
   switch (n) {
-    case 1:{
+    case 126:{
       bool b[8][8] = {
       {0,0,0,1,1,0,0,0},
       {0,0,0,0,1,1,0,0},
@@ -37,8 +37,10 @@ void updateArray(int n) {
       {0,0,0,0,1,1,0,0},
       {0,0,0,1,1,0,0,0}
       };
+      memcpy(a, b, sizeof(b));
+      break;
     }
-    case 48:{ 
+    case 48:{
     bool b[8][8] = {
       {0,0,1,1,1,1,0,0},
       {0,1,0,0,0,0,1,0},
@@ -205,7 +207,7 @@ void updateArray(int n) {
       memcpy(a, b, sizeof(b));
       break;
     }
-    case 67:{    
+    case 67:{
       bool b[8][8] = {
       {0,0,1,1,1,1,0,0},
       {0,1,0,0,0,0,1,0},

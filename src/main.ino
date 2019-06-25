@@ -1,26 +1,41 @@
 #include <Arduino.h>
 
-#define P0 2
-#define P1 3
-#define P2 4
-#define P3 5
-#define P4 6
-#define P5 7
-#define P6 8
-#define P7 9
 #define INTERVAL 100
-#define TEXT "ALPHA"
+#define SENTENCE_INTERVAL 3000
+#define ARROW "~"
+
+const int pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};
+const char *myString[7] = {"HAPPY", "NEW", "YEAR", ARROW, "GOOD", "MORNING", "2019"};
+
+void control_pin(int pin, bool bOpen, bool bClose)
+{
+    // if(bOpen){
+    //     digitalWrite(pin, HIGH);
+    //     delay(10);
+    //     digitalWrite(pin, LOW);
+    // }
+
+    if(bOpen)
+    {
+        digitalWrite(pin, HIGH);
+    }
+
+    delay(10);
+
+    if(bOpen && bClose){
+        digitalWrite(pin, LOW);
+    }
+
+    Serial.print(bOpen);
+}
 
 void write_array(bool data[])
 {
-    digitalWrite(P0, data[0]);
-    digitalWrite(P1, data[1]);
-    digitalWrite(P2, data[2]);
-    digitalWrite(P3, data[3]);
-    digitalWrite(P4, data[4]);
-    digitalWrite(P5, data[5]);
-    digitalWrite(P6, data[6]);
-    digitalWrite(P7, data[7]);
+    for(int i = 8; i >= 0; i--)
+    {
+        control_pin(pins[i], data[(i-1)*2], data[i*2-1]);
+    }
+    Serial.println();
 }
 
 void write_char(char c)
@@ -28,33 +43,46 @@ void write_char(char c)
     updateArray(c);
     for(int i = 0; i < 8; i++)
     {
-        write_array(a[i]);
-        delay(INTERVAL)
+        bool array_data[16];
+        for(int j=0; j < 16; j++){
+            if(j%2 == 0){
+                array_data[j] = a[j/2][i];
+            } else {
+                if(i == 7) { array_data[j] = 0; }
+                else { array_data[j] = a[(j-1)/2][i+1]; }
+            }
+        }
+        write_array(array_data);
+        delay(30);
     }
 }
 
-void write_sentence(String txt)
+void write_sentence(const char *txt)
 {
-    unsigned int string_length = txt.length();
-    char buf[string_length];
-    txt.toCharArray(buf, string_length+1);
-    for(int i=0; i<string_length; i++){
-        write_char(buf[i]);
+    for(int i=0; txt[i] != '\0'; i++){
+        write_char(txt[i]);
     }
 }
 
 
 void setup() {
-    pinMode(P0, OUTPUT);
-    pinMode(P1, OUTPUT);
-    pinMode(P2, OUTPUT);
-    pinMode(P3, OUTPUT);
-    pinMode(P4, OUTPUT);
-    pinMode(P5, OUTPUT);
-    pinMode(P6, OUTPUT);
-    pinMode(P7, OUTPUT);
+
+    for(int i = 0; i < 8; i++)
+    {
+        pinMode(pins[i], OUTPUT);
+    }
+    Serial.begin(38400);
 }
 
 void loop() {
-    write_sentence(text);
+    for(int i=0; i<100; i++){
+        write_my_strings();
+    }
+}
+
+void write_my_strings(){
+    for(int i=0; i < 7; i++) {
+        write_sentence(myString[i]);
+        delay(SENTENCE_INTERVAL);
+    }
 }
