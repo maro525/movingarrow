@@ -2,27 +2,27 @@ bool a[8][8];
 int count = 0;
 int char_count=0;
 
-void setup() {
-  Serial.begin(38400);
-  updateArray('A');
-}
-
-// A, B, C...と順番に出力していく
-void loop() {
-  if (count < 8) {
-    for (int i=0; i<8; i++) {
-      Serial.print(a[i][count]);
-      Serial.println("");
-    }
-    Serial.println("------------------");
-  } else {
-    count = 0;
-    char_count++;
-    updateArray('A'+char_count);
-  }
-  count++;
-  delay(1000); 
-}
+// void setup() {
+//   Serial.begin(38400);
+//   updateArray('A');
+// }
+//
+// // A, B, C...と順番に出力していく
+// void loop() {
+//   if (count < 8) {
+//     for (int i=0; i<8; i++) {
+//       Serial.print(a[i][count]);
+//       Serial.println("");
+//     }
+//     Serial.println("------------------");
+//   } else {
+//     count = 0;
+//     char_count++;
+//     updateArray('A'+char_count);
+//   }
+//   count++;
+//   delay(1000);
+// }
 
 void updateArray(int n) {
   switch (n) {
@@ -53,7 +53,7 @@ void updateArray(int n) {
       memcpy(a, b, sizeof(b));
       break;
     }
-    case 67:{    
+    case 67:{
       bool b[8][8] = {
       {0,0,1,1,1,1,0,0},
       {0,1,0,0,0,0,1,0},
