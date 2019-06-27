@@ -1,4 +1,5 @@
 .pio
+.python-version
 .pioenvs
 .piolibdeps
 .clang_complete
