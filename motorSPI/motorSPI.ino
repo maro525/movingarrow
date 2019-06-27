@@ -61,7 +61,6 @@ void loop() {
       digitalWrite(Pin21, HIGH);
       digitalWrite(Pin22, LOW);
       Serial.println("GO");
-      Serial.write(1);
       //delay(1000);
     }
 
@@ -81,7 +80,6 @@ void loop() {
       digitalWrite(Pin21, LOW);
       digitalWrite(Pin22, LOW);
       Serial.println("STOP");
-      Serial.write(0);
     }
 
     if (DAT[3] == 223) {
@@ -102,6 +100,13 @@ void loop() {
       Serial.println("left");
     }
 
+    if (DAT[4] == 223) {
+        Serial.write(1);
+    }
+
+    if (DAT[4] == 191) {
+        Serial.write(0);
+    }
 
   }
   Serial.println();
