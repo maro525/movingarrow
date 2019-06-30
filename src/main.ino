@@ -63,9 +63,8 @@ void write_array()
     // close pin
     for(int j = pin_num-1; j >= 0; j--)
     {
-        // Serial.print("*");
-        // Serial.print(j*2+1);
-        // Serial.print("=");
+        // Serial.print("bClose");
+        // Serial.print(array_data[j*2+1]);
         if(bCloseEveryPin){
             close_pin(pins[j]);
         }
@@ -89,7 +88,7 @@ void write_char(char c)
                 array_data[i] = a[i/2][ai];
             } else {
                 if(pin_index == pin_num-1){ array_data[i] = 1; } // 最後のピンは必ず閉める
-                else{ array_data[i] = a[(i-1)/2][ai+1]; }
+                else{ array_data[i] = !a[(i-1)/2][ai+1]; }
                 pin_index +=1;
             }
             if(!bGo) { break; }
