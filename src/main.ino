@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <pt.h>
 
-#define CONTROL_INTERVAL 200 // 一回水滴を出すとき、開く→閉じるをする間のインターバル
+#define CONTROL_INTERVAL 80 // 一回水滴を出すとき、開く→閉じるをする間のインターバル
 #define ARRAY_INTERVAL 80 // 列ごとのインターバル
 #define SENTENCE_INTERVAL 3000 // 言葉ごとのインターバル
 #define BREATH_LENGTH 3000 // 息をすう長さ
@@ -16,11 +16,15 @@ const int pin_num = 8;
 const int pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};
 const int breath_pin = 10;
 const char *myString[7] = {"HAPPY", "NEW", "YEAR", ARROW, "GOOD", "MORNING", "2019"};
+// const char *myString[7] = {ARROW,ARROW, "A", "ABC", "123", "123", ARROW};
 
-bool bGo = true;
+bool bGo = true; // ループをまわしてよいかどうかのフラッグ。Serialがくると、falseになってループを抜け出す
 
 ////////////////
 // thread1; control pin
+
+const int data_len = pin_num*2;
+bool array_data[data_len];
 
 void open_all_pin(){
     for(int i=0; i<pin_num; i++){
@@ -36,58 +40,53 @@ void close_pin(int pin){
     digitalWrite(pin, LOW);
 }
 
-void write_array(bool data[])
+int pin_index;
+void write_array()
 {
     // open pin
-    int pin_index = 0;
     for(int i = pin_num-1; i >= 0; i--)
     {
-        // control_pin(pins[pin_index], data[(i-1)*2], data[i*2-1]);
-        if(data[(i-1)*2]) {
-            open_pin(pins[pin_index]);
+        if(array_data[i*2]) {
+            open_pin(pins[i]);
             Serial.print('1');
         } else {
             Serial.print('0');
         }
-        // Serial.print("<");
-        // Serial.print(pin_index);
-        // Serial.print("|");
-        // Serial.print(pins[pin_index]);
-        // Serial.print(">");
         pin_index += 1;
     }
 
     delay(CONTROL_INTERVAL);
 
     // close pin
-    pin_index = 0;
     for(int j = pin_num-1; j >= 0; j--)
     {
-        if(data[j*2-1]) close_pin(pins[pin_index]);
+        // Serial.print("*");
+        // Serial.print(j*2+1);
+        // Serial.print("=");
+        if(array_data[j*2+1]) close_pin(pins[j]);
         pin_index += 1;
     }
 
     Serial.println();
 }
 
+// array_dataにデータをいれる.ながさ16
+// 開ける開けない, 閉める閉めない、×8 = 要素数16の配列
 void write_char(char c)
 {
     updateArray(c);
-    for(int i = 0; i < pin_num; i++)
-    {
-        const int data_len = pin_num*2;
-        bool array_data[data_len];
-        for(int j=0; j < data_len; j++){
-            if(j%2 == 0){
-                array_data[j] = a[j/2][i];
+    for(int ai=0; ai<pin_num; ai++){
+        for(int i=0; i<data_len; i++){
+            if (i%2==0) {
+                array_data[i] = a[i/2][ai];
             } else {
-                if(i == pin_num-1) { array_data[j] = 0; }
-                else { array_data[j] = a[(j-1)/2][i+1]; }
+                if(pin_index == pin_num-1){ array_data[i] = 1; } // 最後のピンは必ず閉める
+                else{ array_data[i] = a[(i-1)/2][ai+1]; }
+                pin_index +=1;
             }
+            if(!bGo) { break; }
         }
-        if(!bGo){ break; }
-
-        write_array(array_data);
+        write_array();
         delay(ARRAY_INTERVAL);
     }
 }
@@ -100,30 +99,32 @@ void write_sentence(const char *txt)
     }
 }
 
-bool arr[8];
 void write_my_strings(){
     if (!bGo) { return; }
 
-    // for(int i=0; i < 7; i++) {
-    //     write_sentence(myString[i]);
-    //     delay(SENTENCE_INTERVAL);
-    //     // breath();
-    //     if(!bGo){ return; }
-    // }
+    for(int i=0; i < 7; i++) {
+        write_sentence(myString[i]);
+        delay(SENTENCE_INTERVAL);
+        // breath();
+        if(!bGo){ return; }
+    }
+}
 
+// 11111111と00000000の連続
+void pomp_check(){
     // 1を書く
     for(int i=0; i<pin_num*2; i++){
-        if(i%2==0) arr[i] = 1;
-        else arr[i] = 0;
+        if(i%2==0) array_data[i] = 1; // 開けるか開けないかの情報
+        else array_data[i] = 1; // 閉めるか閉めないかの情報
     }
-    write_array(arr);
+    write_array();
     delay(ARRAY_INTERVAL);
     // 0を書く
     for(int i=0; i<pin_num*2; i++){
-        if(i%2==0) arr[i] = 0;
-        else arr[i] = 1;
+        if(i%2==0) array_data[i] = 0; // 開けるか開けないかの情報
+        else array_data[i] = 1;  // 閉めるか閉めないかの情報」
     }
-    write_array(arr);
+    write_array();
 }
 
 
@@ -164,7 +165,8 @@ static int thread1(struct pt *pt) {
 
     while(true) {
         PT_WAIT(pt, &timestamp, 10);
-        write_my_strings();
+        // write_my_strings();
+        pomp_check();
     }
 
     PT_END(pt);
