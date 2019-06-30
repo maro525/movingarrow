@@ -45,15 +45,15 @@ void write_array(bool data[])
         // control_pin(pins[pin_index], data[(i-1)*2], data[i*2-1]);
         if(data[(i-1)*2]) {
             open_pin(pins[pin_index]);
-            // Serial.print('1');
+            Serial.print('1');
         } else {
-            // Serial.print('0');
+            Serial.print('0');
         }
-        Serial.print("<");
+        // Serial.print("<");
         // Serial.print(pin_index);
         // Serial.print("|");
-        Serial.print(pins[pin_index]);
-        Serial.print(">");
+        // Serial.print(pins[pin_index]);
+        // Serial.print(">");
         pin_index += 1;
     }
 
@@ -112,14 +112,16 @@ void write_my_strings(){
     // }
 
     // 1を書く
-    for(int i=0; i<8; i++){
-        arr[i] = 1;
+    for(int i=0; i<pin_num*2; i++){
+        if(i%2==0) arr[i] = 1;
+        else arr[i] = 0;
     }
     write_array(arr);
     delay(ARRAY_INTERVAL);
     // 0を書く
-    for(int i=0; i<8; i++){
-        arr[i] = 0;
+    for(int i=0; i<pin_num*2; i++){
+        if(i%2==0) arr[i] = 0;
+        else arr[i] = 1;
     }
     write_array(arr);
 }
