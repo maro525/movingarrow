@@ -1,12 +1,13 @@
 #include <Arduino.h>
 #include <pt.h>
 
-#define CONTROL_INTERVAL 200
-#define ARRAY_INTERVAL 80
-#define SENTENCE_INTERVAL 3000
-#define BREATH_LENGTH 3000
+#define CONTROL_INTERVAL 200 // 一回水滴を出すとき、開く→閉じるをする間のインターバル
+#define ARRAY_INTERVAL 80 // 列ごとのインターバル
+#define SENTENCE_INTERVAL 3000 // 言葉ごとのインターバル
+#define BREATH_LENGTH 3000 // 息をすう長さ
 #define ARROW "~"
 
+// スレッドを使うためのdefine
 #define PT_WAIT(pt, timestamp, usec) PT_WAIT_UNTIL(pt, millis() - *timestamp > usec);*timestamp = millis();
 
 static struct pt pt1, pt2;
@@ -21,36 +22,40 @@ bool bGo = true;
 ////////////////
 // thread1; control pin
 
-void control_pin(int pin, bool bOpen, bool bClose)
-{
-    if(bOpen){
-        digitalWrite(pin, HIGH);
-        delay(CONTROL_INTERVAL);
-        digitalWrite(pin, LOW);
-    }
+void open_pin(int pin){
+    digitalWrite(pin, HIGH);
+}
 
-    // if(bOpen)
-    // {
-    //     digitalWrite(pin, HIGH);
-    // }
-    //
-    // delay(CONTROL_INTERVAL);
-    //
-    // if(bOpen && bClose){
-    //     digitalWrite(pin, LOW);
-    // }
-
-    Serial.print(bOpen);
+void close_pin(int pin){
+    digitalWrite(pin, LOW);
 }
 
 void write_array(bool data[])
 {
+    // open pin
     int pin_index = 0;
     for(int i = pin_num; i >= 0; i--)
     {
-        control_pin(pins[pin_index], data[(i-1)*2], data[i*2-1]);
+        // control_pin(pins[pin_index], data[(i-1)*2], data[i*2-1]);
+        if(data[(i-1)*2]) {
+            open_pin(pins[pin_index]);
+            Serial.print('1');
+        } else {
+            Serial.print('0');
+        }
         pin_index += 1;
     }
+
+    delay(CONTROL_INTERVAL);
+
+    // close pin
+    pin_index = 0;
+    for(int j = pin_num; j >= 0; j--)
+    {
+        if(data[j*2-1]) close_pin(pins[pin_index]);
+        pin_index += 1;
+    }
+
     Serial.println();
 }
 
