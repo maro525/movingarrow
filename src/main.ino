@@ -22,6 +22,12 @@ bool bGo = true;
 ////////////////
 // thread1; control pin
 
+void open_all_pin(){
+    for(int i=0; i<pin_num; i++){
+        digitalWrite(pins[i], LOW);
+    }
+}
+
 void open_pin(int pin){
     digitalWrite(pin, HIGH);
 }
@@ -34,15 +40,20 @@ void write_array(bool data[])
 {
     // open pin
     int pin_index = 0;
-    for(int i = pin_num; i >= 0; i--)
+    for(int i = pin_num-1; i >= 0; i--)
     {
         // control_pin(pins[pin_index], data[(i-1)*2], data[i*2-1]);
         if(data[(i-1)*2]) {
             open_pin(pins[pin_index]);
-            Serial.print('1');
+            // Serial.print('1');
         } else {
-            Serial.print('0');
+            // Serial.print('0');
         }
+        Serial.print("<");
+        // Serial.print(pin_index);
+        // Serial.print("|");
+        Serial.print(pins[pin_index]);
+        Serial.print(">");
         pin_index += 1;
     }
 
@@ -50,7 +61,7 @@ void write_array(bool data[])
 
     // close pin
     pin_index = 0;
-    for(int j = pin_num; j >= 0; j--)
+    for(int j = pin_num-1; j >= 0; j--)
     {
         if(data[j*2-1]) close_pin(pins[pin_index]);
         pin_index += 1;
@@ -100,11 +111,13 @@ void write_my_strings(){
     //     if(!bGo){ return; }
     // }
 
+    // 1を書く
     for(int i=0; i<8; i++){
         arr[i] = 1;
     }
     write_array(arr);
     delay(ARRAY_INTERVAL);
+    // 0を書く
     for(int i=0; i<8; i++){
         arr[i] = 0;
     }
@@ -127,6 +140,7 @@ void read_serial()
 {
     while(Serial.available()){
         byte inChar = char(Serial.read());
+        Serial.print("***");
         Serial.print(inChar);
         if (inChar == 1){
             Serial.println("go!");
@@ -182,6 +196,8 @@ void setup() {
     PT_INIT(&pt2);
 
     // breath();
+
+    open_all_pin(); // すべてのピンを占める
 }
 
 void loop() {
