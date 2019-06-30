@@ -7,10 +7,13 @@
 #define BREATH_LENGTH 3000 // 息をすう長さ
 #define ARROW "~"
 
+const bool bCloseEveryPin = false; // すべてのピンを閉じるか閉じないかのフラグ
+
 // スレッドを使うためのdefine
 #define PT_WAIT(pt, timestamp, usec) PT_WAIT_UNTIL(pt, millis() - *timestamp > usec);*timestamp = millis();
 
 static struct pt pt1, pt2;
+
 
 const int pin_num = 8;
 const int pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};
@@ -63,7 +66,12 @@ void write_array()
         // Serial.print("*");
         // Serial.print(j*2+1);
         // Serial.print("=");
-        if(array_data[j*2+1]) close_pin(pins[j]);
+        if(bCloseEveryPin){
+            close_pin(pins[j]);
+        }
+        else{
+            if(array_data[j*2+1]) close_pin(pins[j]);
+        }
         pin_index += 1;
     }
 
@@ -165,8 +173,8 @@ static int thread1(struct pt *pt) {
 
     while(true) {
         PT_WAIT(pt, &timestamp, 10);
-        // write_my_strings();
-        pomp_check();
+        write_my_strings();
+        // pomp_check();
     }
 
     PT_END(pt);
