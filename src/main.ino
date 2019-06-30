@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <pt.h>
 
-#define CONTROL_INTERVAL 10
-#define ARRAY_INTERVAL 30
+#define CONTROL_INTERVAL 200
+#define ARRAY_INTERVAL 80
 #define SENTENCE_INTERVAL 3000
 #define BREATH_LENGTH 3000
 #define ARROW "~"
@@ -16,38 +16,40 @@ const int pins[8] = {2, 3, 4, 5, 6, 7, 8, 9};
 const int breath_pin = 10;
 const char *myString[7] = {"HAPPY", "NEW", "YEAR", ARROW, "GOOD", "MORNING", "2019"};
 
-bool bGo = false;
+bool bGo = true;
 
 ////////////////
 // thread1; control pin
 
 void control_pin(int pin, bool bOpen, bool bClose)
 {
-    // if(bOpen){
-    //     digitalWrite(pin, HIGH);
-    //     delay(10);
-    //     digitalWrite(pin, LOW);
-    // }
-
-    if(bOpen)
-    {
+    if(bOpen){
         digitalWrite(pin, HIGH);
-    }
-
-    delay(CONTROL_INTERVAL);
-
-    if(bOpen && bClose){
+        delay(CONTROL_INTERVAL);
         digitalWrite(pin, LOW);
     }
+
+    // if(bOpen)
+    // {
+    //     digitalWrite(pin, HIGH);
+    // }
+    //
+    // delay(CONTROL_INTERVAL);
+    //
+    // if(bOpen && bClose){
+    //     digitalWrite(pin, LOW);
+    // }
 
     Serial.print(bOpen);
 }
 
 void write_array(bool data[])
 {
+    int pin_index = 0;
     for(int i = pin_num; i >= 0; i--)
     {
-        control_pin(pins[i], data[(i-1)*2], data[i*2-1]);
+        control_pin(pins[pin_index], data[(i-1)*2], data[i*2-1]);
+        pin_index += 1;
     }
     Serial.println();
 }
@@ -82,23 +84,36 @@ void write_sentence(const char *txt)
     }
 }
 
+bool arr[8];
 void write_my_strings(){
     if (!bGo) { return; }
 
-    for(int i=0; i < 7; i++) {
-        write_sentence(myString[i]);
-        delay(SENTENCE_INTERVAL);
-        breath();
-        if(!bGo){ return; }
+    // for(int i=0; i < 7; i++) {
+    //     write_sentence(myString[i]);
+    //     delay(SENTENCE_INTERVAL);
+    //     // breath();
+    //     if(!bGo){ return; }
+    // }
+
+    for(int i=0; i<8; i++){
+        arr[i] = 1;
     }
+    write_array(arr);
+    delay(ARRAY_INTERVAL);
+    for(int i=0; i<8; i++){
+        arr[i] = 0;
+    }
+    write_array(arr);
 }
 
 
 void breath()
 {
+    Serial.println("breah start");
     digitalWrite(breath_pin, HIGH);
     delay(BREATH_LENGTH);
     digitalWrite(breath_pin, LOW);
+    Serial.println("breath end");
 }
 
 ////////////////
@@ -140,7 +155,7 @@ static int thread2(struct pt *pt) {
 
     while(true) {
         PT_WAIT(pt,&timestamp, 10);
-        read_serial();
+        // read_serial();
     }
     PT_END(pt);
 }
@@ -161,7 +176,7 @@ void setup() {
     PT_INIT(&pt1);
     PT_INIT(&pt2);
 
-    breath();
+    // breath();
 }
 
 void loop() {
