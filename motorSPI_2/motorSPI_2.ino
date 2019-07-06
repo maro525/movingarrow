@@ -22,7 +22,7 @@ const int Pin12 = 8;
 const int Pin21 = 4;
 const int Pin22 = 5;
 
-int count = 0;
+int loop_count = 0;
 bool go_flag = false;
 //pump
 boolean flag = false;
@@ -74,22 +74,26 @@ void loop() {
       //delay(1000);
     }
 
+    // まるボタンがが押されたら
     if (DAT[4] == 223) {
-     if (go_flag) {
-       if (count >= 10) {
-          digitalWrite(Pin11, HIGH);
-          digitalWrite(Pin12, LOW);
-          digitalWrite(Pin21, HIGH);
-          digitalWrite(Pin22, LOW);
-          go_flag = false;
-       } else {
-          count++;   
-       }
-     } else {
-      go_flag = true;
-     }
+      // ひと押しで複数検知している場合を除外
+      if (loop_count >= 10 || loop_count == 0) {
+        go_flag = !go_flag;
+        loop_count = 0;
+      }
+      loop_count++;
+    } else {
+      loop_count = 0;
     }
-    
+
+    if (go_flag) {
+      digitalWrite(Pin11, HIGH);
+      digitalWrite(Pin12, LOW);
+      digitalWrite(Pin21, HIGH);
+      digitalWrite(Pin22, LOW);
+    }
+
+
     if (DAT[3] == 191) {
       //後退
       digitalWrite(Pin11, LOW);
@@ -146,7 +150,7 @@ void loop() {
 //     }
 
      if (DAT[4] == 191) {
-      
+
       digitalWrite(2,LOW);
       //Serial.println("left");
     }
